@@ -1,5 +1,5 @@
 import datetime
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, redirect
 from bson import ObjectId
 from pymongo import DESCENDING
 import cloudinary
@@ -12,6 +12,20 @@ from extensions import db
 
 resources_bp = Blueprint('resources_bp', __name__, url_prefix='/api/resources')
 resources_collection = db.resources
+
+# ========== HTTPS ENFORCEMENT ==========
+@resources_bp.before_request
+def enforce_https():
+    """Redirect all HTTP requests to HTTPS"""
+    # Check if the request came through HTTP (common behind proxies)
+    if request.headers.get('X-Forwarded-Proto') == 'http':
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
+    
+    # Additional check for direct HTTP requests
+    if not request.is_secure and not request.headers.get('X-Forwarded-Proto') == 'https':
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
 
 # Cloudinary config (⚠️ Use environment variables in production)
 cloudinary.config(
