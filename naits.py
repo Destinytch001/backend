@@ -40,6 +40,8 @@ app.register_blueprint(resources_bp)
 from users import init_users_routes
 from pymongo import MongoClient
 
+from faculty_wear import init_faculty_wear_module
+
 client = MongoClient(os.environ.get("MONGO_URI"))
 db = client.get_database()
 
@@ -116,7 +118,8 @@ try:
     # ✅ Initialize notifications module
     from notifications import init_notifications_module
     init_notifications_module(users_collection, notifications_collection, user_notifications_collection)
-
+       # Initialize faculty wear module
+    init_faculty_wear_module(app, db)
     # Indexes
     users_collection.create_index([('last_seen', -1)])
     users_collection.create_index([('status', 1)])
